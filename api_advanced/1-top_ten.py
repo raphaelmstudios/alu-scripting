@@ -1,16 +1,29 @@
 #!/usr/bin/python3
-""" 1-top_ten.py """
+"""Gather data from an API"""
+
 import requests
+import sys
 
 
-def top_ten(subreddit):
-    """ prints the titles of the first 10 hot posts listed in a subreddit """
-    url = 'https://www.reddit.com/r/{}/hot.json?limit=10'.format(subreddit)
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    response = requests.get(url, headers=headers, allow_redirects=False)
-    if response.status_code != 200:
-        print(None)
-        return
-    posts = response.json()['data']['children']
-    for post in posts:
-        print(post['data']['title'])
+if __name__ == "__main__":
+    user_id = sys.argv[1]
+
+    user_url = "https://jsonplaceholder.typicode.com/users/{}".format(user_id)
+    todos_url = "https://jsonplaceholder.typicode.com/users/{}/todos".format(
+        user_id
+    )
+
+    user_info = requests.get(user_url).json()
+    todos_info = requests.get(todos_url).json()
+
+    employee_name = user_info.get("name")
+    task_completed = list(filter(lambda obj: obj.get("completed") is True,
+                                 todos_info))
+    number_of_done_tasks = len(task_completed)
+    total_number_of_tasks = len(todos_info)
+
+    print("Employee {} is done with tasks({}/{}):"
+          .format(employee_name, number_of_done_tasks, total_number_of_tasks))
+
+    for task in task_completed:
+        print("\t {}".format(task.get("title")))
