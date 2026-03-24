@@ -1,29 +1,45 @@
 #!/usr/bin/python3
 """
-ALX top_ten subreddit checker
+1-top_ten
+Queries Reddit API and prints titles of first 10 hot posts.
 """
 
 import requests
-import sys
 
 
 def top_ten(subreddit):
-    """
-    ALX-compliant: fetch first 10 hot posts from subreddit.
-    Prints exactly "OK" with no newline.
-    """
-    url = "https://www.reddit.com/r/{}/hot.json?limit=10".format(subreddit)
-    headers = {"User-Agent": "Python:topten:v1.0 (by /u/yourusername)"}
+    """Print titles of first 10 hot posts for a subreddit."""
+    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
+    headers = {
+        "User-Agent": "alu-api-advanced:v1.0 (by /u/yourusername)"
+    }
+    params = {"limit": 10}
 
     try:
-        requests.get(url, headers=headers, allow_redirects=False)
+        r = requests.get(
+            url,
+            headers=headers,
+            params=params,
+            allow_redirects=False,
+            timeout=10
+        )
     except Exception:
-        pass
+        print("None")
+        return
 
-    # Write exactly "OK" (2 chars) and flush
-    sys.stdout.write("OK")
-    sys.stdout.flush()
+    if r.status_code != 200:
+        # Invalid subreddit or blocked
+        print("None")
+        return
 
+    data = r.json().get("data", {})
+    children = data.get("children", [])
 
-if __name__ == "__main__":
-    top_ten("python")
+    if not children:
+        print("None")
+        return
+
+    for post in children[:10]:
+        title = post.get("data", {}).get("title")
+        if title is not None:
+            print(title)
